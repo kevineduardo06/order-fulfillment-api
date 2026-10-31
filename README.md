@@ -1,62 +1,70 @@
 # Order Fulfillment API
 
-A small but realistic TypeScript/Express greenfield API for order fulfillment workflows. It models products, inventory, orders, shipment preparation, cancellation, stock reservation, and operational reporting.
+A personal TypeScript and Express REST API for exploring order fulfillment workflows, inventory management, shipment processing, and operational reporting. The project is an independently developed prototype and uses in-memory repositories; it is not currently presented as a production service.
 
-This repo is intentionally lightweight but structured like a real service so it can be used for engineering tasks involving bug fixes, refactors, feature extensions, testing, and workflow evaluation.
-
-## Domain
-
-The API supports:
+## Features
 
 - Product catalog management
-- Inventory receiving and reservation
-- Order creation with stock reservation
-- Order cancellation with stock release
+- Inventory receiving, stock availability, and reservations
+- Order creation, payment-state updates, and cancellation
 - Shipment creation for paid orders
-- Operational reports for available stock and revenue
+- Inventory and revenue reports
+- Automated API and workflow tests
 
-## Important business rules
+## Technology
 
-- `available = onHand - reserved`
-- Creating an order reserves stock immediately.
-- Cancelling a pending or paid order releases reserved stock.
-- Shipping a paid order consumes reserved stock and reduces on-hand stock.
-- Shipped orders cannot be cancelled.
-- Orders cannot be shipped unless they are paid.
-- Payments are represented by marking an order as paid; no external payment gateway is included.
+- Node.js, TypeScript, Express
+- Zod for request validation
+- Vitest and Supertest for testing
+- In-memory data repositories (no database required)
 
-## Commands
+## Getting started
+
+Requires a recent Node.js version compatible with the dependencies and npm.
 
 ```bash
 npm install
-npm test
 npm run build
+npm test
 npm run dev
 ```
 
-## Useful endpoints
+The development server is configured in `src/server.ts`. See `src/app.ts` for route definitions and HTTP behavior.
 
-```http
-GET /health
-POST /products
-GET /products
-POST /inventory/receive
-GET /inventory/:productId
-POST /orders
-GET /orders/:id
-POST /orders/:id/pay
-POST /orders/:id/cancel
-POST /shipments
-GET /reports/inventory
-GET /reports/revenue
-```
+## Endpoints
 
-## Good task ideas
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | `/health` | Health check |
+| POST | `/products` | Create a product |
+| GET | `/products` | List products |
+| POST | `/inventory/receive` | Receive stock |
+| GET | `/inventory/:productId` | Read inventory |
+| POST | `/orders` | Create and reserve an order |
+| GET | `/orders/:id` | Read an order |
+| POST | `/orders/:id/pay` | Mark an order paid (simulated) |
+| POST | `/orders/:id/cancel` | Cancel an eligible order |
+| POST | `/shipments` | Create a shipment |
+| GET | `/reports/inventory` | Inventory report |
+| GET | `/reports/revenue` | Revenue report |
 
-- Prevent duplicate shipments for the same order.
-- Add partial shipment support without breaking full shipment behavior.
-- Fix inventory inconsistencies when cancelling orders after payment.
-- Add stable sorting and filtering to the order list.
-- Add idempotency keys for order creation or shipment creation.
-- Refactor duplicated inventory calculations into one service method.
-- Add tests for stock reservation edge cases.
+## Business rules
+
+- Available stock equals on-hand stock minus reserved stock.
+- Creating an order reserves stock.
+- Cancelling an eligible order releases its reservation.
+- Shipping a paid order consumes reserved stock and reduces on-hand stock.
+- Shipped orders cannot be cancelled.
+- Payment is simulated by a state change; there is no payment gateway integration.
+
+## Project status and limitations
+
+This is a development prototype. Repositories store data in memory, so data is not durable across process restarts. It is not intended for real customer orders or payment processing in its current form. No real customer data is required to run or test it.
+
+## Planned work
+
+See [ROADMAP.md](ROADMAP.md) for proposed features, refactoring, testing, and estimated implementation effort. Estimates are planning assumptions, not work already completed.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
